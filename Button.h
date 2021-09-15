@@ -28,7 +28,6 @@
  *              2. Set the PIN direction which the button is connected as INPUT pin
  *              3. Set the pin internal resistor
  */
-void BUTTON_init();
 
 /* Description: Read the Button state Pressed/Released */
 uint8 BUTTON_getState(void);

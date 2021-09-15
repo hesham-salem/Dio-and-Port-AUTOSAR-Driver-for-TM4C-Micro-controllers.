@@ -14,8 +14,7 @@
 
 #include "Common_Macros.h"
 #include "Std_Types.h"
-
-
+#include "port_Cfg.h"
 #define PORT_SW_MAJOR_VERSION           (1U)
 #define PORT_SW_MINOR_VERSION           (0U)
 #define PORT_SW_PATCH_VERSION           (0U)
@@ -56,6 +55,13 @@
  *                              Module Data Types                              *
  *******************************************************************************/
 #define  Port_PinModeType uint8  
+#define  Port_PinType uint8
+#define   Port_PinDirectionType uint8
+#define Port_type uint8  
+#define initial_valueType     uint8 
+
+   
+#define Pin_numbers (43U)   
 /* Description: Enum to hold PIN direction */
 typedef enum
 {
@@ -67,6 +73,10 @@ typedef enum
 {
     OFF,PULL_UP,PULL_DOWN
 }Port_InternalResistor;
+typedef enum
+{
+  LOW,HIGH
+}Intial_value;
 
 /* Description: Structure to configure each individual PIN:
  *	1. the PORT Which the pin belongs to. 0, 1, 2, 3, 4 or 5
@@ -76,18 +86,18 @@ typedef enum
  */
 typedef struct 
 {
-    uint8 port_num; 
-    uint8 pin_num; 
+    Port_type port_num; 
+    Port_PinType pin_num; 
     Port_PinModeType Port_PinMode;
     Port_PinDirection direction;
     Port_InternalResistor resistor;
-    uint8 initial_value;
+    initial_valueType initial_value;
 }Port_ConfigType;
 
 typedef struct
 {
-  Port_ConfigType channles[42];
-}Port_ConfigType2;
+  Port_ConfigType port_pins[Pin_numbers];
+}Port_pinConfigType;
   
 /*modes */
 #define GPIO_mode 0
@@ -111,6 +121,8 @@ typedef struct
 *              - Setup the direction of the GPIO pin
 *              - Setup the internal resistor for i/p pin
 ************************************************************************************/
-void Port_init(const Port_ConfigType *ConfigPtr );
+void Port_init(const Port_pinConfigType * ConfigPtr );
+/* Extern PB structures to be used by PORT and other modules */
 
+const extern Port_pinConfigType port_Configuration;
 #endif /* PORT_H */

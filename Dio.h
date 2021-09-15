@@ -59,14 +59,14 @@
 #if ((DIO_CFG_AR_RELEASE_MAJOR_VERSION != DIO_AR_RELEASE_MAJOR_VERSION)\
  ||  (DIO_CFG_AR_RELEASE_MINOR_VERSION != DIO_AR_RELEASE_MINOR_VERSION)\
  ||  (DIO_CFG_AR_RELEASE_PATCH_VERSION != DIO_AR_RELEASE_PATCH_VERSION))
-  #error "The AR version of Dio_Cfg.h does not match the expected version"
+ // #error "The AR version of Dio_Cfg.h does not match the expected version"
 #endif
 
 /* Software Version checking between Dio_Cfg.h and Dio.h files */
 #if ((DIO_CFG_SW_MAJOR_VERSION != DIO_SW_MAJOR_VERSION)\
  ||  (DIO_CFG_SW_MINOR_VERSION != DIO_SW_MINOR_VERSION)\
  ||  (DIO_CFG_SW_PATCH_VERSION != DIO_SW_PATCH_VERSION))
-  #error "The SW version of Dio_Cfg.h does not match the expected version"
+//  #error "The SW version of Dio_Cfg.h does not match the expected version"
 #endif
 
 /* Non AUTOSAR files */

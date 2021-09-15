@@ -32,8 +32,26 @@
 /* Pre-compile option for Version Info API */
 #define PORT_VERSION_INFO_API                (STD_OFF)
 
-/* Pre-compile option for presence of Dio_FlipChannel API */
+#define PORT_A                  (0U)
+#define PORT_A_PIN_0            (0u)
+#define PORT_A_PIN_1            (1u)
+#define PORT_A_PIN_2            (2u)
+#define PORT_A_PIN_3            (1u)
+#define PORT_A_PIN_4            (1u)
+#define PORT_A_PIN_5            (1u)
+#define PORT_A_PIN_6            (1u)
+#define PORT_A_PIN_7            (1u)
 
+
+#define PORT_B                  (1U)
+#define PORT_B_PIN_0            (0u)
+#define PORT_B_PIN_1            (1u)
+#define PORT_B_PIN_2            (2u)
+#define PORT_B_PIN_3            (1u)
+#define PORT_B_PIN_4            (1u)
+#define PORT_B_PIN_5            (1u)
+#define PORT_B_PIN_6            (1u)
+#define PORT_B_PIN_7            (1u)
 
 /* Number of the configured Dio Channels */
 #define PORT_CHANNLES              (42U)

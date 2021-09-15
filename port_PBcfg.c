@@ -42,24 +42,28 @@
    
    
 /* PB structure used with Dio_Init API */
-const Port_ConfigType2 port_Configuration = {
-  0,0,GPIO_mode,INPUT,OFF,0,
-    0,1,GPIO_mode,INPUT,OFF,0,
-  0,2,GPIO_mode,INPUT,OFF,0,
-  0,3,GPIO_mode,INPUT,OFF,0,
-  0,4,GPIO_mode,INPUT,OFF,0,
-  0,5,GPIO_mode,INPUT,OFF,0,
-  0,6,GPIO_mode,INPUT,OFF,0,
-  0,7,GPIO_mode,INPUT,OFF,0,
+const Port_pinConfigType port_Configuration = {
+  PORT_A,PORT_A_PIN_0,GPIO_mode,INPUT,OFF,LOW,
+    PORT_A,PORT_A_PIN_1,GPIO_mode,INPUT,OFF,0,
+  PORT_A,PORT_A_PIN_2,GPIO_mode,INPUT,OFF,0,
+  PORT_A,PORT_A_PIN_3,GPIO_mode,INPUT,OFF,0,
+  PORT_A,PORT_A_PIN_4,GPIO_mode,INPUT,OFF,0,
+  PORT_A,PORT_A_PIN_5,GPIO_mode,INPUT,OFF,0,
+  PORT_A,PORT_A_PIN_6,GPIO_mode,INPUT,OFF,0,
+  PORT_A,PORT_A_PIN_7,GPIO_mode,INPUT,OFF,0,
   
-   1,0,GPIO_mode,INPUT,OFF,0,
-    1,1,GPIO_mode,INPUT,OFF,0,
-  1,2,GPIO_mode,INPUT,OFF,0,
-  1,3,GPIO_mode,INPUT,OFF,0,
-  1,4,GPIO_mode,INPUT,OFF,0,
-  1,5,GPIO_mode,INPUT,OFF,0,
-  1,6,GPIO_mode,INPUT,OFF,0,
-  1,7,GPIO_mode,INPUT,OFF,0,
+  
+  PORT_B,PORT_B_PIN_0,GPIO_mode,INPUT,OFF,0,
+    PORT_B,PORT_B_PIN_1,GPIO_mode,INPUT,OFF,0,
+  PORT_B,PORT_B_PIN_2,GPIO_mode,INPUT,OFF,0,
+  PORT_B,PORT_B_PIN_3,GPIO_mode,INPUT,OFF,0,
+  PORT_B,PORT_B_PIN_4,GPIO_mode,INPUT,OFF,0,
+  PORT_B,PORT_B_PIN_5,GPIO_mode,INPUT,OFF,0,
+  PORT_B,PORT_B_PIN_6,GPIO_mode,INPUT,OFF,0,
+  PORT_B,PORT_B_PIN_7,GPIO_mode,INPUT,OFF,0,
+  
+  
+  
   
                                            
 				         };

@@ -20,21 +20,10 @@ static uint8 g_button_state = BUTTON_RELEASED;
 
 /*******************************************************************************************************************/
 /* Description: Called by the Button_Init function (only) used to fill the Button configurations structure */
-static void BUTTON_configurations(void)
-{
-    g_Button_Config.port_num  = BUTTON_PORT;             /* Set Button PORT value */
-    g_Button_Config.pin_num   = BUTTON_PIN_NUM;          /* Set Button PIN Number value */
-    g_Button_Config.direction = INPUT;                   /* Set Button as INPUT pin */
-    g_Button_Config.resistor  = PULL_UP;                 /* Enable Intrnal pull up at this pin */
-    g_Button_Config.initial_value  = BUTTON_RELEASED;    /* Button is released */
-}
+
 
 /*******************************************************************************************************************/
-void BUTTON_init(void)
-{
-    BUTTON_configurations();
-    Port_init(&g_Button_Config);
-}
+
 
 /*******************************************************************************************************************/
 uint8 BUTTON_getState(void)
