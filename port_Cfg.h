@@ -31,6 +31,7 @@
 
 /* Pre-compile option for Version Info API */
 #define PORT_VERSION_INFO_API                (STD_OFF)
+#define PORT_SET_PIN_DIRECTION_API            (STD_ON)
 
 #define PORT_A                  (0U)
 #define PORT_A_PIN_0            (0u)
@@ -54,8 +55,8 @@
 #define PORT_B_PIN_7            (1u)
 
 /* Number of the configured Dio Channels */
-#define PORT_CHANNLES              (42U)
-
+#define PORT_PINS              (43U)
+#define CONFIGURATED_MODES      (10U)
 /* Channel Index in the array of structures in Dio_PBcfg.c */
 #define DioConf_LED1_CHANNEL_ID_INDEX        (uint8)0x09
 #define DioConf_SW1_CHANNEL_ID_INDEX         (uint8)0x09
