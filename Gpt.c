@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 #include "Gpt.h"
-#include "port_registers.h"
+#include "tm4c123gh6pm_registers.h"
 
 #define SYSTICK_PRIORITY_MASK  0x1FFFFFFF
 #define SYSTICK_INTERRUPT_PRIORITY  3

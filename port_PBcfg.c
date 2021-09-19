@@ -8,7 +8,7 @@
  *
  * Author: Hesham Salem
  ******************************************************************************/
-
+#include "port_Cfg.h"
 #include "port.h"
 
 /*
@@ -41,7 +41,7 @@
 
    
    
-/* PB structure used with Dio_Init API */
+/* PB structure used with PORT_Init API */
 const Port_pinConfigType port_Configuration = {
   PORT_A,PORT_A_PIN_0,GPIO_mode,INPUT,OFF,LOW,STD_ACTIVE,STD_ACTIVE,
     PORT_A,PORT_A_PIN_1,GPIO_mode,INPUT,OFF,LOW,STD_ACTIVE,STD_ACTIVE,

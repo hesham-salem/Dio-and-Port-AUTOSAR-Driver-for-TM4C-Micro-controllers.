@@ -4,13 +4,13 @@
  *
  * File Name: Dio_Cfg.h
  *
- * Description: Pre-Compile Configuration Header file for TM4C123GH6PM Microcontroller - Dio Driver
+ * Description: Pre-Compile Configuration Header file for TM4C123GH6PM Microcontroller - port Driver
  *
- * Author: Mohamed Tarek
+ * Author: Hesham Salem
  ******************************************************************************/
 
-#ifndef DIO_CFG_H
-#define DIO_CFG_H
+#ifndef PORT_CFG_H
+#define PORT_CFG_H
 
 /*
  * Module Version 1.0.0
@@ -31,7 +31,13 @@
 
 /* Pre-compile option for Version Info API */
 #define PORT_VERSION_INFO_API                (STD_OFF)
+/* Pre-compile option for ------------- API */
+
 #define PORT_SET_PIN_DIRECTION_API            (STD_ON)
+#define PORT_PINS              (43U)
+#define CONFIGURATED_MODES      (10U)
+
+
 
 #define PORT_A                  (0U)
 #define PORT_A_PIN_0            (0u)
@@ -54,19 +60,9 @@
 #define PORT_B_PIN_6            (1u)
 #define PORT_B_PIN_7            (1u)
 
-/* Number of the configured Dio Channels */
-#define PORT_PINS              (43U)
-#define CONFIGURATED_MODES      (10U)
-/* Channel Index in the array of structures in Dio_PBcfg.c */
-#define DioConf_LED1_CHANNEL_ID_INDEX        (uint8)0x09
-#define DioConf_SW1_CHANNEL_ID_INDEX         (uint8)0x09
 
-/* DIO Configured Port ID's  */
-#define DioConf_LED1_PORT_NUM                (Dio_PortType)5 /* PORTF */
-#define DioConf_SW1_PORT_NUM                 (Dio_PortType)5 /* PORTF */
-
-/* DIO Configured Channel ID's */
-#define DioConf_LED1_CHANNEL_NUM             (Dio_ChannelType)1 /* Pin 1 in PORTF */
-#define DioConf_SW1_CHANNEL_NUM              (Dio_ChannelType)4 /* Pin 4 in PORTF */
+/*modes */
+#define GPIO_mode 0
+#define ADC_mode 1
 
 #endif /* DIO_CFG_H */

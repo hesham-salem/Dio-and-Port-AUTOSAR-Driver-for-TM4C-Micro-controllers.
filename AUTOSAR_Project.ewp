@@ -1960,6 +1960,9 @@
   <file>
     <name>$PROJ_DIR$\Std_Types.h</name>
   </file>
+  <file>
+    <name>$PROJ_DIR$\tm4c123gh6pm_registers.h</name>
+  </file>
 </project>
 
 

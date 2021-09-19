@@ -9,21 +9,11 @@
  * Author: Mohamed Tarek
  ******************************************************************************/
 #include "Dio.h"
-#include "Port.h"
 #include "Button.h"
 
-/* Button Configurations Structure */
-static Port_ConfigType g_Button_Config;
 
 /* Global variable to hold the button state */
 static uint8 g_button_state = BUTTON_RELEASED;
-
-/*******************************************************************************************************************/
-/* Description: Called by the Button_Init function (only) used to fill the Button configurations structure */
-
-
-/*******************************************************************************************************************/
-
 
 /*******************************************************************************************************************/
 uint8 BUTTON_getState(void)

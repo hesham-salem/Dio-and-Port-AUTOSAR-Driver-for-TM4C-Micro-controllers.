@@ -12,12 +12,8 @@
 #ifndef PORT_H
 #define PORT_H
 
-#include "Common_Macros.h"
-#include "Std_Types.h"
-#include "port_Cfg.h"
 
-/* Id for the company in the AUTOSAR
- * for example Mohamed Tarek's ID = 1000 :) */
+/* Id for the company in the AUTOSAR */
 #define PORT_VENDOR_ID    (1500U)
 
 /* Dio Module Id */
@@ -26,15 +22,7 @@
 /* Dio Instance Id */
 #define PORT_INSTANCE_ID  (0U)
 
-/*
-* Service ID for DIO read Channel */
-#define PORT_INIT_SID                            (uint8)0x00
-#define PORT_REFESH_PORT_DIRECTION_SID           (uint8)0x02
-#define PORT_SET_PIN_MODE_SID                    (uint8)0x04
-#define PORT_SET_PIN_DIRECTION_SID               (uint8)0x01
-#define PORT_GET_VERSION_INFO_STD                (uint8)0x03
-
-
+/*module version */
 #define PORT_SW_MAJOR_VERSION           (1U)
 #define PORT_SW_MINOR_VERSION           (0U)
 #define PORT_SW_PATCH_VERSION           (0U)
@@ -46,31 +34,62 @@
 #define PORT_AR_RELEASE_MINOR_VERSION   (0U)
 #define PORT_AR_RELEASE_PATCH_VERSION   (3U)
 
+/*
+ * Macros for PORT Status
+ */
+#define PORT_INITIALIZED                (1U)
+#define PORT_NOT_INITIALIZED            (0U)
+
+/* Standard AUTOSAR types */
+#include "Std_Types.h"
+
+/* AUTOSAR checking between Std Types and Dio Modules */
+#if ((STD_TYPES_AR_RELEASE_MAJOR_VERSION != PORT_AR_RELEASE_MAJOR_VERSION)\
+ ||  (STD_TYPES_AR_RELEASE_MINOR_VERSION != PORT_AR_RELEASE_MINOR_VERSION)\
+ ||  (STD_TYPES_AR_RELEASE_PATCH_VERSION != PORT_AR_RELEASE_PATCH_VERSION))
+  #error "The AR version of Std_Types.h does not match the expected version"
+#endif
+
+/* port Pre-Compile Configuration Header file */
+#include "port_Cfg.h"
+
+/* AUTOSAR Version checking between Dio_Cfg.h and Dio.h files */
+#if ((PORT_CFG_AR_RELEASE_MAJOR_VERSION != PORT_AR_RELEASE_MAJOR_VERSION)\
+ ||  (PORT_CFG_AR_RELEASE_MINOR_VERSION != PORT_AR_RELEASE_MINOR_VERSION)\
+ ||  (PORT_CFG_AR_RELEASE_PATCH_VERSION != PORT_AR_RELEASE_PATCH_VERSION))
+ // #error "The AR version of Dio_Cfg.h does not match the expected version"
+#endif
+
+/* Software Version checking between Dio_Cfg.h and Dio.h files */
+#if ((PORT_CFG_SW_MAJOR_VERSION != PORT_SW_MAJOR_VERSION)\
+ ||  (PORT_CFG_SW_MINOR_VERSION != PORT_SW_MINOR_VERSION)\
+ ||  (PORT_CFG_SW_PATCH_VERSION != PORT_SW_PATCH_VERSION))
+//  #error "The SW version of Dio_Cfg.h does not match the expected version"
+#endif
+
+/* Non AUTOSAR files */
+#include "Common_Macros.h"
+
+/******************************************************************************
+ *                      API Service Id Macros                                 *
+ ******************************************************************************/
+
+#define PORT_INIT_SID                            (uint8)0x00
+#define PORT_REFESH_PORT_DIRECTION_SID           (uint8)0x02
+#define PORT_SET_PIN_MODE_SID                    (uint8)0x04
+#define PORT_SET_PIN_DIRECTION_SID               (uint8)0x01
+#define PORT_GET_VERSION_INFO_STD                (uint8)0x03
 
 /*******************************************************************************
- *                              Module Definitions                             *
+ *                      DET Error Codes                                        *
  *******************************************************************************/
-
-/* GPIO Registers base addresses */
-#define GPIO_PORTA_BASE_ADDRESS           0x40004000
-#define GPIO_PORTB_BASE_ADDRESS           0x40005000
-#define GPIO_PORTC_BASE_ADDRESS           0x40006000
-#define GPIO_PORTD_BASE_ADDRESS           0x40007000
-#define GPIO_PORTE_BASE_ADDRESS           0x40024000
-#define GPIO_PORTF_BASE_ADDRESS           0x40025000
-
-/* GPIO Registers offset addresses */
-#define PORT_DATA_REG_OFFSET              0x3FC
-#define PORT_DIR_REG_OFFSET               0x400
-#define PORT_ALT_FUNC_REG_OFFSET          0x420
-#define PORT_PULL_UP_REG_OFFSET           0x510
-#define PORT_PULL_DOWN_REG_OFFSET         0x514
-#define PORT_DIGITAL_ENABLE_REG_OFFSET    0x51C
-#define PORT_LOCK_REG_OFFSET              0x520
-#define PORT_COMMIT_REG_OFFSET            0x524
-#define PORT_ANALOG_MODE_SEL_REG_OFFSET   0x528
-#define PORT_CTL_REG_OFFSET               0x52C
-
+#define PORT_E_PARAM_PIN  (uint8) 0x0A
+#define PORT_E_DIRECTION_UNCHANGEABLE (uint8) 0x0B
+#define PORT_E_PARAM_CONFIG (uint8) 0x0C
+#define PORT_E_PARAM_INVALID_MODE (uint8) 0x0D
+#define PORT_E_MODE_UNCHANGEABLE (uint8) 0x0E
+#define PORT_E_UNINIT (uint8) 0x0F
+#define PORT_E_PARAM_POINTER (uint8) 0x10
 /*******************************************************************************
  *                              Module Data Types                              *
  *******************************************************************************/
@@ -82,20 +101,7 @@
 #define Direction_changableType     uint8
 #define mode_changableType          uint8        
 
-   
-
-
-/*
- * Macros for PORT Status
- */
-#define PORT_INITIALIZED                (1U)
-#define PORT_NOT_INITIALIZED            (0U)
-
-
-
-#define Pin_numbers (43U)   
-/* Description: Enum to hold PIN direction */
-typedef enum
+   typedef enum
 {
     INPUT,OUTPUT
 }Port_PinDirection;
@@ -130,48 +136,24 @@ typedef struct
 
 typedef struct
 {
-  Port_ConfigType port_pins[Pin_numbers];
+  Port_ConfigType port_pins[PORT_PINS];
 }Port_pinConfigType;
-/*******************************************************************************
- *                      DET Error Codes                                        *
- *******************************************************************************/
-#define PORT_E_PARAM_PIN  (uint8) 0x0A
-#define PORT_E_DIRECTION_UNCHANGEABLE (uint8) 0x0B
-#define PORT_E_PARAM_CONFIG (uint8) 0x0C
-#define PORT_E_PARAM_INVALID_MODE (uint8) 0x0D
-#define PORT_E_MODE_UNCHANGEABLE (uint8) 0x0E
-#define PORT_E_UNINIT (uint8) 0x0F
-#define PORT_E_PARAM_POINTER (uint8) 0x10
 
-/*modes */
-#define GPIO_mode 0
-#define ADC_mode 1
 
 
 /*******************************************************************************
  *                      Function Prototypes                                    *
  *******************************************************************************/
 
-/************************************************************************************
-* Service Name: Port_SetupGpioPin
-* Sync/Async: Synchronous
-* Reentrancy: reentrant
-* Parameters (in): ConfigPtr - Pointer to post-build configuration data
-* Parameters (inout): None
-* Parameters (out): None
-* Return value: None
-* Description: Function to Setup the pin configuration:
-*              - Setup the pin as Digital GPIO pin
-*              - Setup the direction of the GPIO pin
-*              - Setup the internal resistor for i/p pin
-************************************************************************************/
 void Port_init(const Port_pinConfigType * ConfigPtr );
-/* Extern PB structures to be used by PORT and other modules */
 void Port_RefreshPortDirection(void);
 void Port_SetPinMode(Port_PinType Pin_ID,Port_PinModeType Mode);
 void Port_SetPinDirection(Port_PinType Pin_ID,Port_PinDirectionType Direction);
 void PORT_GetVersionInfo(Std_VersionInfoType *versioninfo);
 
+/*******************************************************************************
+ *                       External Variables                                    *
+ *******************************************************************************/
 
 const extern Port_pinConfigType port_Configuration;
 #endif /* PORT_H */

@@ -11,8 +11,17 @@
 
 #include "Port.h"
 #include "port_registers.h"
-#include "det.h"
+#if (DIO_DEV_ERROR_DETECT == STD_ON)
 
+#include "Det.h"
+/* AUTOSAR Version checking between Det and Dio Modules */
+#if ((DET_AR_MAJOR_VERSION != PORT_AR_RELEASE_MAJOR_VERSION)\
+ || (DET_AR_MINOR_VERSION != PORT_AR_RELEASE_MINOR_VERSION)\
+ || (DET_AR_PATCH_VERSION != PORT_AR_RELEASE_PATCH_VERSION))
+  #error "The AR version of Det.h does not match the expected version"
+#endif
+#endif
+   
  volatile Port_ConfigType * g_ConfigPtr=NULL_PTR;
 STATIC volatile uint8 Port_status = PORT_NOT_INITIALIZED;
 /************************************************************************************
@@ -34,7 +43,6 @@ STATIC volatile uint8 Port_status = PORT_NOT_INITIALIZED;
 ************************************************************************************/
 void Port_init(const Port_pinConfigType * ConfigPtr)
 {
-  g_ConfigPtr =(Port_ConfigType*)ConfigPtr;
     volatile uint32 delay = 0;
       volatile uint32 *PortGpio_Ptr=NULL_PTR;
     int pin_index;
@@ -47,12 +55,20 @@ void Port_init(const Port_pinConfigType * ConfigPtr)
                 return;
 	}
 	else
-        {}
+        {
+          
+          /*
+		 * Set the module state to initialized and point to the PB configuration structure using a global pointer.
+		 * This global pointer is global to be used by other functions to read the PB configuration structures
+		 */
+          g_ConfigPtr =(Port_ConfigType*)ConfigPtr;
+        
+            }
 #endif
 	
     
     
-    for(pin_index=0;pin_index<Pin_numbers;pin_index++)
+    for(pin_index=0;pin_index<PORT_PINS;pin_index++)
     {
       
     switch(g_ConfigPtr[pin_index].port_num)
@@ -175,24 +191,32 @@ void Port_SetPinDirection(Port_PinType Pin_ID,Port_PinDirectionType Direction)
 {
   uint8 ERROR=FALSE;
    #if (PORT_DEV_ERROR_DETECT == STD_ON)
+  	/* Check if the Driver is initialized before using this function */
+
             if(Port_status == PORT_NOT_INITIALIZED)
             {	Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, PORT_SET_PIN_DIRECTION_SID,PORT_E_UNINIT);
 
             ERROR=TRUE;
             }
+            
 	else if (Pin_ID >=PORT_PINS)
 	{
+          /*check if the entered pin number is invalid */
 		Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, PORT_SET_PIN_DIRECTION_SID,
 		     PORT_E_PARAM_PIN);
                             ERROR=TRUE;
 
 	}
         else if (g_ConfigPtr[Pin_ID].Direction_changable==STD_IDLE)
+          /* check if the pin's direction is changable during runtime */
         { Det_ReportError(PORT_MODULE_ID,PORT_INSTANCE_ID,PORT_SET_PIN_DIRECTION_SID,PORT_E_DIRECTION_UNCHANGEABLE);
                                   ERROR=TRUE;
         }
 	else
-        {}
+        {
+          		/* No Action Required */
+
+        }
 #endif
         if(ERROR==FALSE)
         {
@@ -247,10 +271,13 @@ void Port_RefreshPortDirection(void)
             }
 
 	else
-        {}
+        {
+        		/* No Action Required */
+
+        }
 #endif
 
-    for(int pin_index=0;pin_index<Pin_numbers;pin_index++)
+    for(int pin_index=0;pin_index<PORT_PINS;pin_index++)
     {
                if (g_ConfigPtr[pin_index].Direction_changable==STD_ACTIVE)
                {
@@ -258,6 +285,8 @@ void Port_RefreshPortDirection(void)
                }
                else
                {
+                 		/* No Action Required */
+
                }
     switch(g_ConfigPtr[pin_index].port_num)
     {
@@ -287,6 +316,8 @@ void Port_RefreshPortDirection(void)
     
     } else
      {
+       		/* No Action Required */
+
      }
         
 }
@@ -332,7 +363,9 @@ void Port_SetPinMode(Port_PinType Pin_ID,Port_PinModeType Mode)
                }
 
 	else
-        {}
+        {
+        		/* No Action Required */
+}
 #endif
         if(ERROR==FALSE)
         {

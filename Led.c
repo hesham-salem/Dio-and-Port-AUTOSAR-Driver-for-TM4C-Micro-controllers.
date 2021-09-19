@@ -8,18 +8,10 @@
  *
  * Author: Mohamed Tarek
  ******************************************************************************/
-#include "Port.h"
 #include "Dio.h"
 #include "Led.h"
 
-/* LED Configurations Structure */
-static Port_ConfigType  g_LED_Config;
 
-/*********************************************************************************************/
-/* Description: Called by the LED_Init function (only) used to fill the led configurations structure */
-
-
-/*********************************************************************************************/
 
 /*********************************************************************************************/
 void LED_setOn(void)

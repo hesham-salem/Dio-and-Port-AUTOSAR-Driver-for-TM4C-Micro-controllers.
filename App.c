@@ -12,8 +12,9 @@
 #include "App.h"
 #include "Button.h"
 #include "Led.h"
-#include "Dio.h"
 #include "port.h"
+#include "Dio.h"
+
 /* Description: Task executes once to initialize all the Modules */
 void Init_Task(void)
 {
