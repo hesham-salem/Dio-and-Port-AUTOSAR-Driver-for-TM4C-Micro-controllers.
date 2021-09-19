@@ -101,7 +101,7 @@
 #define Direction_changableType     uint8
 #define mode_changableType          uint8        
 
-   typedef enum
+typedef enum
 {
     INPUT,OUTPUT
 }Port_PinDirection;
@@ -146,11 +146,19 @@ typedef struct
  *******************************************************************************/
 
 void Port_init(const Port_pinConfigType * ConfigPtr );
-void Port_RefreshPortDirection(void);
-void Port_SetPinMode(Port_PinType Pin_ID,Port_PinModeType Mode);
-void Port_SetPinDirection(Port_PinType Pin_ID,Port_PinDirectionType Direction);
-void PORT_GetVersionInfo(Std_VersionInfoType *versioninfo);
 
+void Port_RefreshPortDirection(void);
+
+void Port_SetPinMode(Port_PinType Pin_ID,Port_PinModeType Mode);
+
+
+#if (PORT_SET_PIN_DIRECTION_API==STD_ON)
+
+void Port_SetPinDirection(Port_PinType Pin_ID,Port_PinDirectionType Direction);
+#endif
+#if (PORT_VERSION_INFO_API == STD_ON)
+void PORT_GetVersionInfo(Std_VersionInfoType *versioninfo);
+#endif
 /*******************************************************************************
  *                       External Variables                                    *
  *******************************************************************************/
