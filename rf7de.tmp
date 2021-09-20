@@ -334,7 +334,7 @@
 #define PORT_E_PIN_5_analog_mode_selection         (STD_OFF)
 
 #define PORT_F_PIN_0_analog_mode_selection         (STD_OFF)
-#define PORT_F_PIN_1_analog_mode_selection         (STD_OFF)
+#define PORT_F_PIN_1_analog_mode_selection         (STD-OFF)
 #define PORT_F_PIN_2_analog_mode_selection         (STD_OFF)
 #define PORT_F_PIN_3_analog_mode_selection         (STD_OFF)
 #define PORT_F_PIN_4_analog_mode_selection         (STD_OFF)
