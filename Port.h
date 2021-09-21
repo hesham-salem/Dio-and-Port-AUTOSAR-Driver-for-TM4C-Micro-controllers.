@@ -16,10 +16,10 @@
 /* Id for the company in the AUTOSAR */
 #define PORT_VENDOR_ID    (1500U)
 
-/* Dio Module Id */
+/* port Module Id */
 #define PORT_MODULE_ID    (120U)
 
-/* Dio Instance Id */
+/* port Instance Id */
 #define PORT_INSTANCE_ID  (0U)
 
 /*module version */
@@ -43,7 +43,7 @@
 /* Standard AUTOSAR types */
 #include "Std_Types.h"
 
-/* AUTOSAR checking between Std Types and Dio Modules */
+/* AUTOSAR checking between Std Types and port Modules */
 #if ((STD_TYPES_AR_RELEASE_MAJOR_VERSION != PORT_AR_RELEASE_MAJOR_VERSION)\
  ||  (STD_TYPES_AR_RELEASE_MINOR_VERSION != PORT_AR_RELEASE_MINOR_VERSION)\
  ||  (STD_TYPES_AR_RELEASE_PATCH_VERSION != PORT_AR_RELEASE_PATCH_VERSION))
@@ -53,14 +53,14 @@
 /* port Pre-Compile Configuration Header file */
 #include "port_Cfg.h"
 
-/* AUTOSAR Version checking between Dio_Cfg.h and Dio.h files */
+/* AUTOSAR Version checking between Dio_Cfg.h and port.h files */
 #if ((PORT_CFG_AR_RELEASE_MAJOR_VERSION != PORT_AR_RELEASE_MAJOR_VERSION)\
  ||  (PORT_CFG_AR_RELEASE_MINOR_VERSION != PORT_AR_RELEASE_MINOR_VERSION)\
  ||  (PORT_CFG_AR_RELEASE_PATCH_VERSION != PORT_AR_RELEASE_PATCH_VERSION))
  // #error "The AR version of Dio_Cfg.h does not match the expected version"
 #endif
 
-/* Software Version checking between Dio_Cfg.h and Dio.h files */
+/* Software Version checking between Dio_Cfg.h and port.h files */
 #if ((PORT_CFG_SW_MAJOR_VERSION != PORT_SW_MAJOR_VERSION)\
  ||  (PORT_CFG_SW_MINOR_VERSION != PORT_SW_MINOR_VERSION)\
  ||  (PORT_CFG_SW_PATCH_VERSION != PORT_SW_PATCH_VERSION))
@@ -96,7 +96,6 @@
 #define Port_PinModeType            uint8  
 #define Port_PinType                uint8
 #define Port_type                   uint8  
-#define initial_valueType           uint8 
 #define Direction_changableType     uint8
 #define mode_changableType          uint8        
 #define analog_mode_selectionType   uint8        
@@ -104,7 +103,7 @@
 *                              port pins definations                              *
 *******************************************************************************/
 #define PORT_PINS              (43U)
-#define CONFIGURATED_MODES      (14U)
+#define CONFIGURATED_MODES     (14U)
 #define PORT_A                  (0U)
 #define PORT_A_PIN_0            (0u)
 #define PORT_A_PIN_1            (1u)
@@ -160,8 +159,9 @@
 #define PORT_F_PIN_3            (3u)
 #define PORT_F_PIN_4            (4u)
 
-
-/* port pins ID */
+ /*******************************************************************************
+*                              /* port pins ID definations                              *
+*******************************************************************************/
 #define PORT_A_PIN_0_ID            (0u)
 #define PORT_A_PIN_1_ID            (1u)
 #define PORT_A_PIN_2_ID            (2u)
@@ -211,10 +211,10 @@
 #define PORT_F_PIN_3_ID            (41u)
 #define PORT_F_PIN_4_ID            (42u)
  
-   /*modes*/
+   /* default mode*/
 #define DIO_mode 0
 
-   
+   /* Description: Enum to hold pin direction type for PIN */
 typedef enum
 {
     INPUT,OUTPUT
@@ -225,16 +225,22 @@ typedef enum
 {
     OFF,PULL_UP,PULL_DOWN
 }Port_InternalResistor;
+/* Description: Enum to hold Intial level type for PIN */
 typedef enum
 {
   LOW,HIGH
-}Intial_value;
+}initial_level;
 
 /* Description: Structure to configure each individual PIN:
  *	1. the PORT Which the pin belongs to. 0, 1, 2, 3, 4 or 5
  *	2. the number of the pin in the PORT.
- *      3. the direction of pin --> INPUT or OUTPUT
- *      4. the internal resistor --> Disable, Pull up or Pull down
+  *     3.anble/disable analog_mode_selection
+ *      4.the mode for the pin
+ *      5.select if the mode for the pin is changable
+ *      6. the direction of pin --> INPUT or OUTPUT
+ *      7.select if the direction for the pin is changable
+ *      8. the internal resistor --> Disable, Pull up or Pull down
+*       9. choise the intial level for this pin
  */
 typedef struct 
 {
@@ -246,9 +252,11 @@ typedef struct
     Port_PinDirection direction;
     Direction_changableType Direction_changable;
     Port_InternalResistor internal_resistor;
-    initial_valueType initial_level;
+    initial_level initial_level;
 }Port_ConfigType;
 
+/* Description: Structure of array to configure each individual PIN properties
+as unit can be reach by pin index:*/
 typedef struct
 {
   Port_ConfigType port_pins[PORT_PINS];
@@ -259,24 +267,24 @@ typedef struct
 /*******************************************************************************
  *                      Function Prototypes                                    *
  *******************************************************************************/
-
+/*Function to Setup the pin configuration*/
 void Port_init(const Port_pinConfigType * ConfigPtr );
-
+/* Description: Refreshes port direction */
 void Port_RefreshPortDirection(void);
-
+/* Function to Setup the pin mode during runtime:*/
 void Port_SetPinMode(Port_PinType Pin_ID,Port_PinModeType Mode);
 
-
 #if (PORT_SET_PIN_DIRECTION_API==STD_ON)
-
+/*Function to Setup the pin direction during runtime*/
 void Port_SetPinDirection(Port_PinType Pin_ID,Port_PinDirection Direction);
 #endif
 #if (PORT_VERSION_INFO_API == STD_ON)
+/*Function to get the version information of this module.*/
 void PORT_GetVersionInfo(Std_VersionInfoType *versioninfo);
 #endif
 /*******************************************************************************
  *                       External Variables                                    *
  *******************************************************************************/
-
+/* exern the PB structure which contain the properies of pins to used by port driver functions */
 const extern Port_pinConfigType port_Configuration;
 #endif /* PORT_H */
