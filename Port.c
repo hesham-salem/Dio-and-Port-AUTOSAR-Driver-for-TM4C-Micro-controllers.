@@ -48,7 +48,7 @@ void Port_init(const Port_pinConfigType * ConfigPtr)
     int pin_index;
     #if (PORT_DEV_ERROR_DETECT == STD_ON)
 	/* check if the input configuration pointer is not a NULL_PTR */
-	if (NULL_PTR == g_ConfigPtr)
+	if (NULL_PTR == ConfigPtr)
 	{
 		Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, PORT_INIT_SID,
 		     PORT_E_PARAM_CONFIG);
@@ -152,7 +152,7 @@ void Port_init(const Port_pinConfigType * ConfigPtr)
         CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);             /* Clear the corresponding bit in the GPIODIR register to configure it as input pin */
        
         
-        
+    }
         
         if(g_ConfigPtr[pin_index].internal_resistor == PULL_UP)
         {
@@ -167,11 +167,10 @@ void Port_init(const Port_pinConfigType * ConfigPtr)
             CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_UP_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);     /* Clear the corresponding bit in the GPIOPUR register to disable the internal pull up pin */
             CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_DOWN_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);   /* Clear the corresponding bit in the GPIOPDR register to disable the internal pull down pin */
         }
-    }
-    else
-    {
+    
+   
         /* Do Nothing */
-    }
+   
     if(g_ConfigPtr[pin_index].analog_mode_selection ==STD_OFF)
     SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIGITAL_ENABLE_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);        /* Set the corresponding bit in the GPIODEN register to enable digital functionality on this pin */
 else
