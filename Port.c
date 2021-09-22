@@ -11,7 +11,7 @@
 
 #include "Port.h"
 #include "port_registers.h"
-#if (DIO_DEV_ERROR_DETECT == STD_ON)
+#if (PORT_DEV_ERROR_DETECT == STD_ON)
 
 #include "Det.h"
 /* AUTOSAR Version checking between Det and Dio Modules */
@@ -21,8 +21,9 @@
   #error "The AR version of Det.h does not match the expected version"
 #endif
 #endif
-   
+   /* gloable pointer to share PB structure among port driver function */
  volatile Port_ConfigType * g_ConfigPtr=NULL_PTR;
+/* flag to indicate that port driver intialized */
 STATIC volatile uint8 Port_status = PORT_NOT_INITIALIZED;
 /************************************************************************************
 * Service Name: Port_init
@@ -43,34 +44,31 @@ STATIC volatile uint8 Port_status = PORT_NOT_INITIALIZED;
 ************************************************************************************/
 void Port_init(const Port_pinConfigType * ConfigPtr)
 {
-    volatile uint32 delay = 0;
-      volatile uint32 *PortGpio_Ptr=NULL_PTR;
-    int pin_index;
+    volatile uint32 delay = 0; /*used for waste some speed cycle */
+    volatile uint32 *PortGpio_Ptr=NULL_PTR;
+    uint8 pin_index;
     #if (PORT_DEV_ERROR_DETECT == STD_ON)
 	/* check if the input configuration pointer is not a NULL_PTR */
 	if (NULL_PTR == ConfigPtr)
 	{
 		Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, PORT_INIT_SID,
 		     PORT_E_PARAM_CONFIG);
-                return;
+                return; /*return without excute the function */
 	}
-	else
-        {
-          
-          /*
-		 * Set the module state to initialized and point to the PB configuration structure using a global pointer.
+        
+        
+#endif
+	
+                 /*
+		  point to the PB configuration structure using a global pointer.
 		 * This global pointer is global to be used by other functions to read the PB configuration structures
 		 */
           g_ConfigPtr =(Port_ConfigType*)ConfigPtr;
         
-            }
-#endif
-	
-    
-    
-    for(pin_index=0;pin_index<PORT_PINS;pin_index++)
+     for(pin_index=0;pin_index<PORT_PINS;pin_index++)
     {
-      
+      /* loop to map form number of port to its address 
+      and store the address in portGpio_ptr*/
     switch(g_ConfigPtr[pin_index].port_num)
     {
         case  0: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTA_BASE_ADDRESS; /* PORTA Base Address */
@@ -89,8 +87,9 @@ void Port_init(const Port_pinConfigType * ConfigPtr)
     
     /* Enable clock for PORT and allow time for clock to start*/
     SYSCTL_REGCGC2_REG |= (1<<g_ConfigPtr[pin_index].port_num);
-    delay = SYSCTL_REGCGC2_REG;
+    delay = SYSCTL_REGCGC2_REG;/*used for waste some speed cycle */
     
+    /* pins need unlock and commit*/
     if( ((g_ConfigPtr[pin_index].port_num == 3) && (g_ConfigPtr[pin_index].pin_num == 7)) || ((g_ConfigPtr[pin_index].port_num == 5) && (g_ConfigPtr[pin_index].pin_num == 0)) ) /* PD7 or PF0 */
     {
         *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_LOCK_REG_OFFSET) = 0x4C4F434B;                     /* Unlock the GPIOCR register */   
@@ -105,35 +104,41 @@ void Port_init(const Port_pinConfigType * ConfigPtr)
     {
         /* Do Nothing ... No need to unlock the commit register for this pin */
     }
+    
+    
     if(g_ConfigPtr[pin_index].analog_mode_selection ==STD_OFF)
-    {
+    {/*if not select analog mode clear its register */
     CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);      /* Clear the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
   
-  if(g_ConfigPtr[pin_index].Port_PinMode ==DIO_mode)
-  {
-    CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
-    *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) &= ~(0x0000000F << (g_ConfigPtr->pin_num * 4));     /* Clear*/
-  }
-  else 
-  { 
-        SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
-    *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) &= ~(0x0000000F << (g_ConfigPtr[pin_index].pin_num * 4));     /* Clear*/
-    *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) |= ( g_ConfigPtr[pin_index].Port_PinMode<< (g_ConfigPtr[pin_index].pin_num * 4));     /* SET the PMCx bits for this pin */
-  }
+          if(g_ConfigPtr[pin_index].Port_PinMode ==DIO_mode)
+            {/*if select Dio mode clear alternative function and control register */
+              CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
+              *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) &= ~(0x0000000F << (g_ConfigPtr->pin_num * 4));     /* Clear*/
+            }
+          else 
+            { /*if another mode is selected than ADC OR DIO 
+              enable  alternative function 
+              assign control register with the number of mode 0:F*/
+              
+            SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
+            *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) &= ~(0x0000000F << (g_ConfigPtr[pin_index].pin_num * 4));     /* Clear*/
+            *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) |= ( g_ConfigPtr[pin_index].Port_PinMode<< (g_ConfigPtr[pin_index].pin_num * 4));     /* SET the PMCx bits for this pin */
+            }
     
-    }
+    }/*end if of analog selection == std_off */
+    
     else if(g_ConfigPtr[pin_index].analog_mode_selection ==STD_ON)
-        {
-    SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);      /* Clear the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
-
-    SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
+        { /*set analog mode for this pin 
+          enable alternative function */
+    SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);      
+    SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);            
         }
-      else
+    else
       {
-          
+          /*do Nothing */
       }          
                 
-        
+        /* assign the direction of pin */
     if(g_ConfigPtr[pin_index].direction == OUTPUT)
     {
 	SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);                /* Set the corresponding bit in the GPIODIR register to configure it as output pin */
@@ -150,34 +155,29 @@ void Port_init(const Port_pinConfigType * ConfigPtr)
     else if(g_ConfigPtr[pin_index].direction == INPUT)
     {
         CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);             /* Clear the corresponding bit in the GPIODIR register to configure it as input pin */
-       
-        
     }
         
-        if(g_ConfigPtr[pin_index].internal_resistor == PULL_UP)
-        {
-            SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_UP_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);       /* Set the corresponding bit in the GPIOPUR register to enable the internal pull up pin */
-        }
-        else if(g_ConfigPtr[pin_index].internal_resistor == PULL_DOWN)
-        {
-            SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_DOWN_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);     /* Set the corresponding bit in the GPIOPDR register to enable the internal pull down pin */
-        }
-        else
+    /* assign internal resistor */
+    if(g_ConfigPtr[pin_index].internal_resistor == PULL_UP)
+    {
+      SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_UP_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);       /* Set the corresponding bit in the GPIOPUR register to enable the internal pull up pin */
+    }
+    else if(g_ConfigPtr[pin_index].internal_resistor == PULL_DOWN)
+      {
+        SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_DOWN_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);     /* Set the corresponding bit in the GPIOPDR register to enable the internal pull down pin */
+      }
+    else
         {
             CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_UP_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);     /* Clear the corresponding bit in the GPIOPUR register to disable the internal pull up pin */
             CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_DOWN_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);   /* Clear the corresponding bit in the GPIOPDR register to disable the internal pull down pin */
         }
     
-   
-        /* Do Nothing */
-   
-    if(g_ConfigPtr[pin_index].analog_mode_selection ==STD_OFF)
+      
+    if(g_ConfigPtr[pin_index].analog_mode_selection ==STD_OFF){
     SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIGITAL_ENABLE_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);        /* Set the corresponding bit in the GPIODEN register to enable digital functionality on this pin */
-else
-{
-}
       }
-    
+        } /*end of loopping on pins
+    /* Set the module state to initialized */
    Port_status = PORT_INITIALIZED;
 
 }
@@ -245,6 +245,7 @@ void Port_SetPinDirection(Port_PinType Pin_ID,Port_PinDirection Direction)
         case  5: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTF_BASE_ADDRESS; /* PORTF Base Address */
 		 break;
     }
+   /* set the direction of pins */
    if(Direction == OUTPUT)
     {
 	SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , g_ConfigPtr[Pin_ID].pin_num);                /* Set the corresponding bit in the GPIODIR register to configure it as output pin */
@@ -273,28 +274,18 @@ void Port_RefreshPortDirection(void)
 {
   volatile uint32 *PortGpio_Ptr;
    #if (PORT_DEV_ERROR_DETECT == STD_ON)
+  /* check if the port is intialized */
             if(Port_status == PORT_NOT_INITIALIZED)
             {	Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, PORT_REFESH_PORT_DIRECTION_SID,PORT_E_UNINIT);
                         return;
             }
-
-	else
-        {
-        		/* No Action Required */
-
-        }
 #endif
 
     for(int pin_index=0;pin_index<PORT_PINS;pin_index++)
     {
-               if (g_ConfigPtr[pin_index].Direction_changable==STD_OFF)
+               if (g_ConfigPtr[pin_index].Direction_changable==STD_ON)
                {
-                 continue;
-               }
-               else
-               {
-                 		/* No Action Required */
-
+                 continue; /* skip iteration if this pin is  direction chanagable */
                }
     switch(g_ConfigPtr[pin_index].port_num)
     {
@@ -311,6 +302,7 @@ void Port_RefreshPortDirection(void)
         case  5: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTF_BASE_ADDRESS; /* PORTF Base Address */
 		 break;
     }
+    /* refresh the direction of pins depending on PB structure */
     if(g_ConfigPtr[pin_index].direction == OUTPUT)
     {
 	SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);                /* Set the corresponding bit in the GPIODIR register to configure it as output pin */
@@ -349,38 +341,39 @@ void Port_SetPinMode(Port_PinType Pin_ID,Port_PinModeType Mode)
   uint8 ERROR=FALSE;
    #if (PORT_DEV_ERROR_DETECT == STD_ON)
             if(Port_status == PORT_NOT_INITIALIZED)
-            {
+            {  /* check if the port is intialized */
+
               		Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, PORT_SET_PIN_MODE_SID,PORT_E_UNINIT);
                         ERROR=TRUE;
             }
-	else if (Pin_ID >=PORT_PINS)
-	{
+	 if (Pin_ID >=PORT_PINS)
+              {
 		Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, PORT_SET_PIN_MODE_SID,
 		     PORT_E_PARAM_PIN);
                                         ERROR=TRUE;
 
-	}
-        else if (g_ConfigPtr[Pin_ID].mode_changable==STD_IDLE)
-        { Det_ReportError(PORT_MODULE_ID,PORT_INSTANCE_ID,PORT_SET_PIN_MODE_SID,PORT_E_MODE_UNCHANGEABLE);
+            }
+         if (g_ConfigPtr[Pin_ID].mode_changable==STD_OFF)
+            { Det_ReportError(PORT_MODULE_ID,PORT_INSTANCE_ID,PORT_SET_PIN_MODE_SID,PORT_E_MODE_UNCHANGEABLE);
                       
                                 ERROR=TRUE;
-        }
-               else if (CONFIGURATED_MODES<Mode)
+            }
+         if (CONFIGURATED_MODES<Mode)
                {        Det_ReportError(PORT_MODULE_ID,PORT_INSTANCE_ID,PORT_SET_PIN_MODE_SID,PORT_E_PARAM_INVALID_MODE);
-                        ERROR=TRUE;
+                        ERROR=TRUE; /*return without doing any thing */
                }
 
 	else
         {
         		/* No Action Required */
-}
+        }
 #endif
         if(ERROR==FALSE)
         {
-  volatile uint32 *PortGpio_Ptr=NULL_PTR;
+          volatile uint32 *PortGpio_Ptr=NULL_PTR;
   
-   switch(g_ConfigPtr[Pin_ID].port_num)
-    {
+            switch(g_ConfigPtr[Pin_ID].port_num)
+          {
         case  0: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTA_BASE_ADDRESS; /* PORTA Base Address */
 		 break;
 	case  1: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTB_BASE_ADDRESS; /* PORTB Base Address */
@@ -398,17 +391,22 @@ void Port_SetPinMode(Port_PinType Pin_ID,Port_PinModeType Mode)
   
   
       if(Mode ==DIO_mode)
-        {
+        {/*if select Dio mode clear the analog mode, alternative function and control register */
+    CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , g_ConfigPtr[Pin_ID].pin_num);      /* Clear the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
     CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[Pin_ID].pin_num);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
     *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) &= ~(0x0000000F << (g_ConfigPtr[Pin_ID].pin_num * 4));     /* Clear the PMCx bits for this pin */
         }
       else
-      {
+      {/*if another mode is selected than ADC OR DIO 
+              diable the analog mode
+              enable  alternative function 
+              assign control register with the number of mode 0:F*/
+    CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , g_ConfigPtr[Pin_ID].pin_num);      /* Clear the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */        
     SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[Pin_ID].pin_num);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
     *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) &= ~(0x0000000F << (g_ConfigPtr[Pin_ID].pin_num * 4));     /* Clear*/
     *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) |= ( g_ConfigPtr[Pin_ID].Port_PinMode<< (g_ConfigPtr[Pin_ID].pin_num * 4));     /* SET the PMCx bits for this pin */
   }
-      } 
+      } /*end of the loop */
         }
 
 
