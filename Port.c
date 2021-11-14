@@ -109,7 +109,8 @@ void Port_init(const Port_pinConfigType * ConfigPtr)
     if(g_ConfigPtr[pin_index].analog_mode_selection ==STD_OFF)
     {/*if not select analog mode clear its register */
     CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);      /* Clear the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
-  
+      SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIGITAL_ENABLE_REG_OFFSET), g_ConfigPtr[pin_index].pin_num);         /* clear the corresponding bit in the GPIODEN register to enable digital functionality on this pin */
+
           if(g_ConfigPtr[pin_index].Port_PinMode ==DIO_mode)
             {/*if select Dio mode clear alternative function and control register */
               CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
@@ -131,8 +132,12 @@ void Port_init(const Port_pinConfigType * ConfigPtr)
         { /*set analog mode for this pin 
           enable alternative function */
     SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);      
-    SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);            
+    SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);  
+    CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIGITAL_ENABLE_REG_OFFSET), g_ConfigPtr[pin_index].pin_num);         /* clear the corresponding bit in the GPIODEN register to enable digital functionality on this pin */
+			
         }
+    
+    
     else
       {
           /*do Nothing */
@@ -335,7 +340,7 @@ void Port_RefreshPortDirection(void)
 *              
 
 ************************************************************************************/  
-
+#if (PORT_SET_PIN_MODE_API ==STD_ON)
 void Port_SetPinMode(Port_PinType Pin_ID,Port_PinModeType Mode)
 {
   uint8 ERROR=FALSE;
@@ -362,6 +367,10 @@ void Port_SetPinMode(Port_PinType Pin_ID,Port_PinModeType Mode)
                {        Det_ReportError(PORT_MODULE_ID,PORT_INSTANCE_ID,PORT_SET_PIN_MODE_SID,PORT_E_PARAM_INVALID_MODE);
                         ERROR=TRUE; /*return without doing any thing */
                }
+              
+     
+      
+            
 
 	else
         {
@@ -388,13 +397,23 @@ void Port_SetPinMode(Port_PinType Pin_ID,Port_PinModeType Mode)
 		 break;
     }
   
-  
-  
-      if(Mode ==DIO_mode)
+    if(Mode==analog_mode)
+        { /*set analog mode for this pin */
+      SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , g_ConfigPtr[Pin_ID].pin_num);      
+    SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) ,g_ConfigPtr[Pin_ID].pin_num);  
+    CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIGITAL_ENABLE_REG_OFFSET), g_ConfigPtr[Pin_ID].pin_num);         /* clear the corresponding bit in the GPIODEN register to enable digital functionality on this pin */
+				
+        }
+
+       else if(Mode ==DIO_mode)
         {/*if select Dio mode clear the analog mode, alternative function and control register */
     CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , g_ConfigPtr[Pin_ID].pin_num);      /* Clear the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
     CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[Pin_ID].pin_num);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
     *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) &= ~(0x0000000F << (g_ConfigPtr[Pin_ID].pin_num * 4));     /* Clear the PMCx bits for this pin */
+           SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIGITAL_ENABLE_REG_OFFSET), g_ConfigPtr[Pin_ID].pin_num);         /* clear the corresponding bit in the GPIODEN register to enable digital functionality on this pin */
+
+				
+       
         }
       else
       {/*if another mode is selected than ADC OR DIO 
@@ -405,11 +424,13 @@ void Port_SetPinMode(Port_PinType Pin_ID,Port_PinModeType Mode)
     SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , g_ConfigPtr[Pin_ID].pin_num);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
     *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) &= ~(0x0000000F << (g_ConfigPtr[Pin_ID].pin_num * 4));     /* Clear*/
     *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) |= ( g_ConfigPtr[Pin_ID].Port_PinMode<< (g_ConfigPtr[Pin_ID].pin_num * 4));     /* SET the PMCx bits for this pin */
-  }
+     SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIGITAL_ENABLE_REG_OFFSET), g_ConfigPtr[Pin_ID].pin_num);         /* clear the corresponding bit in the GPIODEN register to enable digital functionality on this pin */
+
+      }
       } /*end of the loop */
         }
 
-
+#endif
 /************************************************************************************
 * Service Name: PORT_GetVersionInfo
 * Service ID[hex]: 0x03

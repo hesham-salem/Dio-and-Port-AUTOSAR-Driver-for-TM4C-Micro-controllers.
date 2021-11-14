@@ -23,12 +23,6 @@
 /* Set the Button Pin Number */
 #define BUTTON_PIN_NUM DioConf_SW1_CHANNEL_NUM
 
-/* 
- * Description: 1. Fill the button configurations structure 
- *              2. Set the PIN direction which the button is connected as INPUT pin
- *              3. Set the pin internal resistor
- */
-void BUTTON_init();
 
 /* Description: Read the Button state Pressed/Released */
 uint8 BUTTON_getState(void);

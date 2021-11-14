@@ -213,7 +213,7 @@
  
    /* default mode*/
 #define DIO_mode 0
-
+#define analog_mode 1
    /* Description: Enum to hold pin direction type for PIN */
 typedef enum
 {
