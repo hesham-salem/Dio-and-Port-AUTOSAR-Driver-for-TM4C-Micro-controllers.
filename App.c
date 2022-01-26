@@ -40,7 +40,6 @@ void Led_Task(void)
 void App_Task(void)
 {
     static uint8 button_previous_state = BUTTON_RELEASED;
-    static uint8 button_current_state  = BUTTON_RELEASED;
 	
     button_current_state = BUTTON_getState(); /* Read the button state */
 	
