@@ -109,7 +109,7 @@ void Port_init(const Port_pinConfigType * ConfigPtr)
     if(g_ConfigPtr[pin_index].analog_mode_selection ==STD_OFF)
     {/*if not select analog mode clear its register */
     CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , g_ConfigPtr[pin_index].pin_num);      /* Clear the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
-      SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIGITAL_ENABLE_REG_OFFSET), g_ConfigPtr[pin_index].pin_num);         /* clear the corresponding bit in the GPIODEN register to enable digital functionality on this pin */
+      SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIGITAL_ENABLE_REG_OFFSET), g_ConfigPtr[pin_index].pin_num);         /* set the corresponding bit in the GPIODEN register to enable digital functionality on this pin */
 
           if(g_ConfigPtr[pin_index].Port_PinMode ==DIO_mode)
             {/*if select Dio mode clear alternative function and control register */
